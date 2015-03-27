@@ -12,7 +12,7 @@ int callback(int fd, short op) {
 int main() {
     sys::TcpSocket ts;
     PollEvent pe;
-    pe.Init(callback);
+    pe.Init();
     while(1) {
         pe.Process();
     }

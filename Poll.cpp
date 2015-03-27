@@ -1,7 +1,8 @@
 #include "Config.h"
-#include <sys/epoll.h>
-#include "poll.h"
+#include "Utils.h"
 
+#include "PollObj.h"
+#include "Poll.h"
 
 #ifndef EPOLLRDHUP
 #define USE_OWN_RDHUP
@@ -18,7 +19,6 @@ struct EventContext {
     int epollfd;
     /** wait time out*/
     int timeout;
-    std::function<int (int, short)>callback;
     /** user data for this element*/
     void * data;
     /** the event for which callback was initiated */
@@ -27,13 +27,7 @@ struct EventContext {
     uint8_t cb_flags;
 };
 
-struct EventElement {
-    int fd;
-    epoll_event event;
-    void *data;
-};
-
-int PollEvent::Init(std::function<int (int, short)>cb, int size, int timeout) {
+int PollEvent::Init(int size, int timeout) {
     context = (struct EventContext*)malloc(sizeof(struct EventContext));
     if (context == nullptr) {
         return -1;
@@ -45,7 +39,6 @@ int PollEvent::Init(std::function<int (int, short)>cb, int size, int timeout) {
     }
 
     context->nevents = size;
-    context->callback = cb;
     context->events = (struct epoll_event*)malloc(sizeof(struct epoll_event) * size);
     if (context->events == nullptr) {
         close(context->epollfd);
@@ -56,10 +49,9 @@ int PollEvent::Init(std::function<int (int, short)>cb, int size, int timeout) {
     return 0;
 }
 
-int PollEvent::Add(int fd, int op) {
-    EventElement* ee = (EventElement *)malloc(sizeof(EventEement));
+int PollEvent::Add(PollObj* po, int op) {
     struct epoll_event ev;
-    ev.data.fd = fd;
+    ev.data.ptr = (void*)(po);
     ev.events |= EPOLLERR | EPOLLHUP | EPOLLRDHUP;
     if(op & EV_READ)
         ev.events |= EPOLLIN;
@@ -67,35 +59,45 @@ int PollEvent::Add(int fd, int op) {
         ev.events |= EPOLLOUT;
     if(op & EV_ET)
         ev.events |= EPOLLET;
-    epoll_ctl(context->epollfd, EPOLL_CTL_ADD, fd, &ev);
+    epoll_ctl(context->epollfd, EPOLL_CTL_ADD, po->GetSockFd(), &ev);
     
     return 0;
 }
 
-int PollEvent::Remove(int fd) {
-    epoll_ctl(context->epollfd, EPOLL_CTL_DEL, fd, nullptr);
+int PollEvent::Remove(PollObj* po) {
+    epoll_ctl(context->epollfd, EPOLL_CTL_DEL, po->GetSockFd(), nullptr);
     return 0;
 }
 
 
 
-int PollEvent::Mod(int fd, int op) {
-    
+int PollEvent::Mod(PollObj* po, int op) {
+    struct epoll_event ev;
+    ev.data.ptr = (void*)(po);
+    ev.events |= EPOLLERR | EPOLLHUP | EPOLLRDHUP;
+    if(op & EV_READ)
+        ev.events |= EPOLLIN;
+    if(op & EV_WRITE)
+        ev.events |= EPOLLOUT;
+    if(op & EV_ET)
+        ev.events |= EPOLLET;
+    epoll_ctl(context->epollfd, EPOLL_CTL_MOD, po->GetSockFd(), &ev);
 }
 
 int PollEvent::Process() {
     int fds = epoll_wait(context->epollfd, context->events, context->nevents, context->timeout);
     for(int i = 0; i < fds; ++i) {
-        int what = context->events[i].events;
-        short ev = 0;
+        auto& event = context->events[i];
+        auto what = event.events;
+        auto* po = (PollObj*)(event.data.ptr);
         if (what & (EPOLLHUP | EPOLLERR)) {
-            ev = EV_READ | EV_WRITE;
+            po->OnError();
         }
         else {
             if(what & EPOLLIN)
-                ev |= EV_READ;
+                po->OnRead();
             if(what & EPOLLOUT)
-                ev |= EV_WRITE;
+                po->OnWrite();
         }
     }
     return 0;

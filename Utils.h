@@ -32,6 +32,7 @@ typedef intptr_t socket_t;
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
 #include <netdb.h>
