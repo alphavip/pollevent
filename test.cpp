@@ -1,7 +1,7 @@
 #include "Config.h"
 
-#include "poll.h"
-#include "debug.h"
+#include "Poll.h"
+#include "Debug.h"
 #include "TcpSocket.h"
 
 int callback(int fd, short op) {
