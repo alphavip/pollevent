@@ -4,7 +4,7 @@ project(test)
 
 set(CMAKE_CXX_FLAGS "-DLINUX -DDEBUG -g -ggdb -std=c++11 -Wall")
 
-include_directories(loop/)
+include_directories(loop)
 
 add_subdirectory(loop)
 

@@ -8,8 +8,6 @@
 #include <errno.h>
 #endif
 
-namespace sys
-{
 
 TcpSocket::TcpSocket(): Socket(AF_INET, SOCK_STREAM, 0), _pendClose(false)
 {
@@ -56,50 +54,5 @@ int TcpSocket::write( const void * buf, int len )
 #endif
 }
 
-TcpListener::TcpListener( const char * addr, uint16_t port )
-{
-    while(!bind(addr, port))
-    {
-        fprintf(stderr, "Unable to bind to address\n");
-        fflush(stderr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
-    while(!listen(64))
-    {
-        fprintf(stderr, "Unable to listen on port\n");
-        fflush(stderr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
-}
 
-TcpListener::TcpListener( uint16_t port )
-{
-    while(!bind(port))
-    {
-        fprintf(stderr, "Unable to bind to address\n");
-        fflush(stderr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
-    while(!listen(64))
-    {
-        fprintf(stderr, "Unable to listen on port\n");
-        fflush(stderr);
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
-    }
-}
-
-TcpSocket * TcpListener::accept()
-{
-    struct sockaddr_in addr = {0};
-    socklen_t l = sizeof(addr);
-    socket_t sock = ::accept(_fd, (struct sockaddr *)&addr, &l);
-    if(sock < 0)
-        return NULL;
-    TcpSocket * ts = new(std::nothrow) TcpSocket(sock);
-    if(ts == NULL) return NULL;
-    ts->makeKeepAlive(30, 5, 3);
-    return ts;
-}
-
-}
 

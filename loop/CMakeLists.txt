@@ -1,11 +1,7 @@
 include_directories(.)
 
-set(libepollsource
-  Config.h
-  Config.cpp
-  Debug.h
-  Loop.h
-  Loop.cpp
+set(PollSources
+  DebugLog.h
   Poll.h
   Poll.cpp
   PollObj.h
@@ -13,10 +9,16 @@ set(libepollsource
   Socket.cpp
   TcpSocket.h
   TcpSocket.cpp
+  TcpConn.h
+  TcpConn.cpp
+  TcpListener.h
+  TcpListener.cpp
+  Buffer.h
+  Buffer.cpp
   Utils.h
 )
 
-Message(STATUS ${libepollsource})    
-add_library(libloop STATIC ${libepollsource})
+Message(STATUS ${PollSources})    
+add_library(libloop STATIC ${PollSources})
 
     

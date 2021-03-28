@@ -1,4 +1,7 @@
 #include "Config.h"
+
+#include <memory.h>
+
 #include "Utils.h"
 
 #include "PollObj.h"
@@ -27,7 +30,7 @@ struct EventContext {
     uint8_t cb_flags;
 };
 
-int PollEvent::Init(int size, int timeout) {
+int Poller::Init(int size, int timeout) {
     context = (struct EventContext*)malloc(sizeof(struct EventContext));
     if (context == nullptr) {
         return -1;
@@ -49,8 +52,9 @@ int PollEvent::Init(int size, int timeout) {
     return 0;
 }
 
-int PollEvent::Add(PollObj* po, int op) {
+int Poller::Add(PollObj* po, int op) {
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
     ev.data.ptr = (void*)(po);
     ev.events |= EPOLLERR | EPOLLHUP | EPOLLRDHUP;
     if(op & EV_READ)
@@ -60,19 +64,22 @@ int PollEvent::Add(PollObj* po, int op) {
     if(op & EV_ET)
         ev.events |= EPOLLET;
     epoll_ctl(context->epollfd, EPOLL_CTL_ADD, po->GetSockFd(), &ev);
+
+    po->m_pPoller = this;
     
     return 0;
 }
 
-int PollEvent::Remove(PollObj* po) {
+int Poller::Remove(PollObj* po) {
     epoll_ctl(context->epollfd, EPOLL_CTL_DEL, po->GetSockFd(), nullptr);
     return 0;
 }
 
 
 
-int PollEvent::Mod(PollObj* po, int op) {
+int Poller::Mod(PollObj* po, int op) {
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
     ev.data.ptr = (void*)(po);
     ev.events |= EPOLLERR | EPOLLHUP | EPOLLRDHUP;
     if(op & EV_READ)
@@ -82,9 +89,11 @@ int PollEvent::Mod(PollObj* po, int op) {
     if(op & EV_ET)
         ev.events |= EPOLLET;
     epoll_ctl(context->epollfd, EPOLL_CTL_MOD, po->GetSockFd(), &ev);
+
+    return 0;
 }
 
-int PollEvent::Process() {
+int Poller::Process() {
     int fds = epoll_wait(context->epollfd, context->events, context->nevents, context->timeout);
     for(int i = 0; i < fds; ++i) {
         auto& event = context->events[i];
@@ -95,7 +104,7 @@ int PollEvent::Process() {
         }
         else {
             if(what & EPOLLIN)
-                po->OnRead();
+                po->OnData();
             if(what & EPOLLOUT)
                 po->OnWrite();
         }

@@ -2,9 +2,8 @@
 #define _TCPSOCKET_H_
 
 #include "Socket.h"
+#include "PollObj.h"
 
-namespace sys
-{
 
 /* TCP-Socket class to do basic actions */
 class TcpSocket: public Socket
@@ -31,20 +30,6 @@ private:
     bool _pendClose;
 };
 
-/* TCP-Listener class */
-class TcpListener: public TcpSocket
-{
-public:
-    /* Listen at host:port */
-    TcpListener(const char * host, uint16_t port);
-    /* Listen at 0.0.0.0:port */
-    TcpListener(uint16_t port);
-
-    /* Accept a new socket */
-    TcpSocket * accept();
-};
-
-}
 
 #endif // _TCPSOCKET_H_
 

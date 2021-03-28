@@ -1,8 +1,10 @@
 #include "Config.h"
+#include "DebugLog.h"
 
+#include <thread>
+
+#include "TcpListener.h"
 #include "Poll.h"
-#include "Debug.h"
-#include "TcpSocket.h"
 
 int callback(int fd, short op) {
     LOG("%d, %d", fd, op);
@@ -10,11 +12,18 @@ int callback(int fd, short op) {
 }
 
 int main() {
-    sys::TcpSocket ts;
-    PollEvent pe;
-    pe.Init();
-    while(1) {
-        pe.Process();
+    Poller po;
+    po.Init();
+    TcpListener tl;
+    tl.Listen(8880);
+    po.Add(&tl, EV_READ);
+    while (true)
+    {
+        po.Process();
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
+    
+
+
     return 0;
 }

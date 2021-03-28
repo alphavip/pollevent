@@ -3,9 +3,6 @@
 
 #include "Utils.h"
 
-namespace sys
-{
-
 /* Basic socket class to implement platform independent interfaces */
 class Socket
 {
@@ -43,6 +40,9 @@ public:
     /* get socket remote address */
     uint32_t getRemoteAddr();
 
+    socket_t GetFd() const { return _fd; }
+    void SetFd(socket_t fd) { this->_fd = fd; }
+
 
 public:
     /* get last error */
@@ -60,7 +60,7 @@ protected:
     socket_t _fd;
 };
 
-}
+
 
 #endif // _SOCKET_H_
 

@@ -1,9 +1,10 @@
 #include "Config.h"
+
 #include "Socket.h"
+
 #include "Utils.h"
 
-namespace sys
-{
+
 
 Socket::Socket(): _fd(-1)
 {
@@ -69,11 +70,8 @@ void Socket::close()
 {
     if(_fd < 0)
         return;
-#ifdef _WIN32
-    ::closesocket(_fd);
-#else
+
     ::close(_fd);
-#endif
 }
 
 bool Socket::makeKeepAlive( int idle, int intv, int cnt )
@@ -197,5 +195,5 @@ uint32_t Socket::getRemoteAddr()
     return ntohl(addr.sin_addr.s_addr);
 }
 
-}
+
 
