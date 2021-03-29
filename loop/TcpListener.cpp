@@ -24,6 +24,9 @@ int TcpListener::Listen(const char *addr, uint16_t port)
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
 
+    fprintf(stderr, "listen on host %s:%u\n", addr, port);
+    fflush(stderr);
+
     return 0;
 }
 
@@ -41,7 +44,7 @@ int TcpListener::Listen(uint16_t port)
         fflush(stderr);
         std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
-
+    fprintf(stderr, "listen on host %u\n", port);
     return 0;
 }
 
@@ -65,7 +68,7 @@ void TcpListener::OnData()
     TcpConn* pconn = this->accept();
     if(pconn != nullptr)
     {
-        this->m_pPoller->Add(pconn, EV_READ | EV_ERROT);
+        this->m_pPoller->Add(pconn, EV_READ | EV_ET);
     }
 }
 

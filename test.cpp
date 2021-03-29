@@ -13,14 +13,13 @@ int callback(int fd, short op) {
 
 int main() {
     Poller po;
-    po.Init();
+    po.Init(1024, 10);
     TcpListener tl;
     tl.Listen(8880);
-    po.Add(&tl, EV_READ);
+    po.Add(&tl, EV_READ|EV_ET);
     while (true)
     {
         po.Process();
-        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     }
     
 

@@ -9,6 +9,7 @@
 #include <sys/epoll.h>
 #include <sys/ioctl.h>
 #include <arpa/inet.h>
+#include <sys/uio.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <errno.h>

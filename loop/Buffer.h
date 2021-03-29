@@ -18,6 +18,17 @@ struct BufferChain
     uint16_t read = 0;
     uint16_t write = 0;
     BufferChain* nextpkt = nullptr;
+
+    inline void Init()
+    {
+        Clear();
+    }
+    inline void Clear()
+    {
+        this->read = 0;
+        this->write = 0;
+        this->nextpkt = nullptr;
+    }
 };
 
 class Buffer
@@ -49,7 +60,7 @@ protected:
     virtual BufferChain *Alloc() = 0;
     virtual void Cycle(BufferChain*) = 0;
 
-private:
+protected:
     uint32_t len = 0;
     BufferChain* m_head = nullptr;
     BufferChain* m_end = nullptr;

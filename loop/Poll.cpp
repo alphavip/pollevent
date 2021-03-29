@@ -40,7 +40,7 @@ int Poller::Init(int size, int timeout) {
         free(context);
         return -1;
     }
-
+    context->timeout = timeout;
     context->nevents = size;
     context->events = (struct epoll_event*)malloc(sizeof(struct epoll_event) * size);
     if (context->events == nullptr) {

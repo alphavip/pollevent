@@ -18,13 +18,13 @@ public:
     virtual int32_t Init();
     
     // 链接可读处理
-	virtual void OnData();
+    virtual void OnData();
     
-	// 链接可写处理
-	virtual void OnWrite();
+    // 链接可写处理
+    virtual void OnWrite();
     
-	// 链接出错处理
-	virtual void OnError();
+    // 链接出错处理
+    virtual void OnError();
 
 public:
     virtual void OnConnData(){}
@@ -35,6 +35,7 @@ public:
 
 public:
     void Send(uint8_t* data, uint32_t len);
+    void TmpSend(BufferChain* bc);
 
 protected:
     virtual BufferChain *Alloc();
