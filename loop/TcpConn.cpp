@@ -49,6 +49,7 @@ void TcpConn::OnData()
     {
 
     }
+    std::cout << "read " << ret << std::endl;
 
     
     this->OnConnData();
