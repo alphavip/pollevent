@@ -35,7 +35,7 @@ public:
 
 public:
     void Send(uint8_t* data, uint32_t len);
-    void TmpSend(BufferChain* bc);
+    void TmpSend();
 
 protected:
     virtual BufferChain *Alloc();

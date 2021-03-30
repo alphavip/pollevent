@@ -67,7 +67,7 @@ uint32_t Buffer::CopyOut(char* out, uint32_t l)
 }
 
 
-void Buffer::AddNewChain(BufferChain *bc)
+void Buffer::AddReaChain(BufferChain *bc)
 {
     len += bc->GetCanReadCount();
     if(this->m_head == nullptr)
@@ -82,7 +82,21 @@ void Buffer::AddNewChain(BufferChain *bc)
     }
 }
 
-void Buffer::RemoveChain(uint32_t l)
+void Buffer::AddWriteChain(BufferChain *bc)
+{
+    if(this->m_writeHead == nullptr)
+    {
+        this->m_writeHead = bc;
+        this->m_writeTail = bc;
+    }
+    else
+    {
+        this->m_writeTail->nextpkt = bc;
+        this->m_writeTail = bc;
+    }
+}
+
+void Buffer::RemoveReadChain(uint32_t l)
 {
     if(l >= len)
     {

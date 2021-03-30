@@ -52,8 +52,12 @@ public:
     uint32_t GetLen() { return len; }
     uint32_t CopyOut(char* out, uint32_t l);
 
-    void AddNewChain(BufferChain*);
-    void RemoveChain(uint32_t l);
+    void AddReaChain(BufferChain*);
+    void RemoveReadChain(uint32_t l);
+
+    void AddWriteChain(BufferChain* bc);
+
+
     uint32_t CopyAndRemove(char* out, uint32_t);
 
 protected:

@@ -40,22 +40,38 @@ int32_t TcpConn::Init()
 
 void TcpConn::OnData()
 {
-    BufferChain* buff = this->Alloc();
-    //既然用了et 这里要改 要一次性读完
-    int ret = m_socket.read(buff->GetWriteAddr(), buff->GetCanWriteCount());
-    if(ret < 0)
-    {
-        this->OnConnError();
-        return;
-    }
-    else if(ret == 0)
-    {
+    while (true)
+    {    
+        //TODO最后一次内存泄漏
+        BufferChain* buff = this->Alloc();
+        //既然用了et 这里要改 要一次性读完
+        int ret = m_socket.read(buff->GetWriteAddr(), buff->GetCanWriteCount());
+        if(ret < 0)
+        {
+            if(errno == EAGAIN || errno == EWOULDBLOCK)
+            {
+                break;
+            }
+            else
+            {
+                std::cout << ret << ":" << errno << std::endl;
+                this->OnConnError();
+                return;
+            }
+        }
+        else if(ret == 0)
+        {
+            std::cout << ret << ":" << errno << std::endl;
+            this->OnConnError();
+            return;
+        }
+        buff->write += ret;
+        std::cout << "read " << ret << std::endl;
 
+        this->AddReaChain(buff);
     }
-    buff->write += ret;
-    std::cout << "read " << ret << std::endl;
 
-    this->TmpSend(buff);
+    this->TmpSend();
     this->OnConnData();
 }
 
@@ -136,9 +152,8 @@ void TcpConn::Send(uint8_t* data, uint32_t len)
 
 }
 
-void TcpConn::TmpSend(BufferChain* bc)
+void TcpConn::TmpSend()
 {
-    assert(bc != nullptr);
     // 打开epoll写入检测
     if(m_writeTail == nullptr)
     {
@@ -149,17 +164,13 @@ void TcpConn::TmpSend(BufferChain* bc)
             return;
         }
     }
-    
-    // 放到尾部
-    if(m_writeTail == nullptr)
+
+    for(auto* bc = m_head; bc != nullptr; bc = bc->nextpkt)
     {
-        assert(m_writeHead == NULL);
-        m_writeHead = bc;
-        m_writeTail = bc;
+        this->AddWriteChain(bc);
     }
-    else
-    {
-        m_writeTail->nextpkt = bc;
-    }
+
+    m_head = nullptr;
+    m_end = nullptr;
 }
 
