@@ -163,7 +163,7 @@ void TcpConn::TmpSend()
     // 打开epoll写入检测
     if(m_writeTail == nullptr)
     {
-        int32_t ret = m_pPoller->Mod(this, EV_READ|EV_WRITE|EV_ET);
+        int32_t ret = m_pPoller->Mod(this, EV_WRITE|EV_ET);
         if(ret != 0)
         {
             Clear();
