@@ -40,14 +40,15 @@ int32_t TcpConn::Init()
 
 void TcpConn::OnData()
 {
+    BufferChain* buff = this->Alloc();
     while (true)
     {    
         //TODO最后一次内存泄漏
-        BufferChain* buff = this->Alloc();
         //既然用了et 这里要改 要一次性读完
         int ret = m_socket.read(buff->GetWriteAddr(), buff->GetCanWriteCount());
         if(ret < 0)
         {
+            this->AddReaChain(buff);
             if(errno == EAGAIN || errno == EWOULDBLOCK)
             {
                 break;
@@ -61,14 +62,19 @@ void TcpConn::OnData()
         }
         else if(ret == 0)
         {
+            this->AddReaChain(buff);
             std::cout << ret << ":" << errno << std::endl;
             this->OnConnError();
             return;
         }
         buff->write += ret;
+        if(buff->GetCanWriteCount() == 0)
+        {
+            this->AddReaChain(buff);
+            buff = this->Alloc();
+        }
         std::cout << "read " << ret << std::endl;
 
-        this->AddReaChain(buff);
     }
 
     this->TmpSend();

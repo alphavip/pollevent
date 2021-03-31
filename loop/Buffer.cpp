@@ -23,7 +23,7 @@ uint16_t BufferChain::GetCanReadCount()
 
 uint16_t  BufferChain::GetCanWriteCount()
 {
-    assert(write < _BUFFER_CHAIN_LEN);
+    assert(write <= _BUFFER_CHAIN_LEN);
     return _BUFFER_CHAIN_LEN - write;
 }
 
