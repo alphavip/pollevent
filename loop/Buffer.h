@@ -56,6 +56,7 @@ public:
             assert(tmp->refcount > 0);
             if(--tmp->refcount)
                 Cycle(tmp);
+            tmp = bc;
         }
         m_writeHead = nullptr;
         m_writeTail = nullptr;
